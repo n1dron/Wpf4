@@ -14,7 +14,7 @@ using System.Windows.Shapes;
 
 namespace Wpf4
 {
-    public partial class TypeInput : Window
+    public partial class Input : Window
     {
         private string _typedName;
         public string typedName
@@ -33,7 +33,7 @@ namespace Wpf4
             }
         }
         public bool isResponse = false;
-        public TypeInput()
+        public Input()
         {
             InitializeComponent();
         }

@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 
 namespace Wpf4
 {
-    internal class JsonWorking
+    internal class Json
     {
         public static void Serializing<T>(string path, T Valuev)
         {

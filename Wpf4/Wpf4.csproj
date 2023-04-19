@@ -58,10 +58,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="JsonWorking.cs" />
-    <Compile Include="DataTypes.cs" />
-    <Compile Include="TypeInput.xaml.cs">
-      <DependentUpon>TypeInput.xaml</DependentUpon>
+    <Compile Include="Json.cs" />
+    <Compile Include="Record.cs" />
+    <Compile Include="Input.xaml.cs">
+      <DependentUpon>Input.xaml</DependentUpon>
     </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -75,7 +75,7 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="TypeInput.xaml">
+    <Page Include="Input.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

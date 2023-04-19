@@ -22,59 +22,99 @@ namespace Wpf4
         {
             InitializeComponent();
             UpdateTypesList();
-            ogo_calendar.SelectedDate = DateTime.Now.Date;
+            Datochka.SelectedDate = DateTime.Now.Date;
         }
-        private int GetFreeNoteId()
+        private void dateUpdated(object sender, EventArgs e)
         {
-            List<Note> notes = JsonWorking.Deserializing<List<Note>>("../../../notes.json");
-            int freeId = 1;
-            notes = notes.OrderBy(x => x.id).ToList();
-            Note lastNote = notes.LastOrDefault();
-            if (lastNote != null)
+            UpdateRecord();
+            RefreshWindow();
+        }
+        private void RecordContainer_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (RecordContainer.SelectedIndex == -1) { return; }
+            Record selectedNote = (Record)RecordContainer.SelectedItem;
+            NameInput.Text = selectedNote.Name;
+            MoneyInput.Text = selectedNote.Money.ToString();
+            typesList.SelectedIndex = -1;
+        }
+        private void createDatatype_Click(object sender, RoutedEventArgs e)
+        {
+            Input typeInput = new Input();
+            typeInput.ShowDialog();
+            if (typeInput.isResponse)
             {
-                freeId = lastNote.id + 1;
+                string inputed = typeInput.typedName;
+                UpdateTypesList(inputed);
+            }
+        }
+        private void AddRecord_Click(object sender, RoutedEventArgs e)
+        {
+            SaveData();
+            RefreshWindow();
+        }
+
+        private void EditRecord_Click(object sender, RoutedEventArgs e)
+        {
+            EditData();
+            RefreshWindow();
+        }
+
+        private void RemoveRecord_Click(object sender, RoutedEventArgs e)
+        {
+            DeleteData();
+            RefreshWindow();
+        }
+        private int GetFreeRecordId()
+        {
+            List<Record> rec = Json.Deserializing<List<Record>>("../../../rec.json");
+            int Id = 1;
+            rec = rec.OrderBy(x => x.id).ToList();
+            Record lastRec = rec.LastOrDefault();
+            if (lastRec != null)
+            {
+                Id = lastRec.id + 1;
             }
             else
             {
-                freeId = 1;
+                Id = 1;
             }
-            return freeId;
+            return Id;
         }
         private void RefreshWindow()
         {
             typesList.SelectedIndex = -1;
-            nameInput.Text = "";
-            countInput.Text = "";
+            NameInput.Text = "";
+            MoneyInput.Text = "";
         }
-        private List<Note> GetTodayNotes(List<Note> notes, out double todaySumm, out double allSumm)
+        private List<Record> GetTodayRecord(List<Record> rec, out double todaySumm, out double allSumm)
         {
             todaySumm = 0;
             allSumm = 0;
-            DateTime date = Convert.ToDateTime(ogo_calendar.SelectedDate);
-            List<Note> todayNotes = new List<Note>();
-            foreach (Note note in notes)
+            DateTime date = Convert.ToDateTime(Datochka.SelectedDate);
+            List<Record> todayrec = new List<Record>();
+            foreach (Record recor in rec)
             {
-                allSumm += note.count;
-                if (note.date.Date == date.Date)
+                allSumm += recor.Money;
+                if (recor.Date.Date == date.Date)
                 {
-                    todaySumm += note.count;
-                    todayNotes.Add(note);
+                    todaySumm += recor.Money;
+                    todayrec.Add(recor);
                 }
             }
-            return todayNotes;
+            return todayrec;
         }
-        private void UpdateNotes(Note newNote = null)
+        private void UpdateRecord(Record newrec = null)
         {
-            string notePath = "../../../notes.json";
-            List<Note> notes = JsonWorking.Deserializing<List<Note>>(notePath);
+            string recPath = "../../../rec.json";
+            List<Record> rec = Json.Deserializing<List<Record>>(recPath);
             double todaySumm;
             double allSumm;
-            if (newNote != null)
+            if (newrec != null)
             {
-                notes.Add(newNote);
-                JsonWorking.Serializing(notePath, notes);
+                rec.Add(newrec);
+                Json.Serializing(recPath, rec);
             }
-            notesContainer.ItemsSource = GetTodayNotes(notes, out todaySumm, out allSumm);
+            RecordContainer.ItemsSource = GetTodayRecord(rec, out todaySumm, out allSumm);
             allSum.Text = $"Общая сумма: {allSumm}";
             todaySum.Text = $"Общая сумма: {todaySumm}";
 
@@ -83,37 +123,37 @@ namespace Wpf4
         {
             string typePath = "../../../types.json";
             List<string> types = new List<string>();
-            types = JsonWorking.Deserializing<List<string>>(typePath);
+            types = Json.Deserializing<List<string>>(typePath);
             if (newVal != "")
             {
                 types.Add(newVal);
-                JsonWorking.Serializing(typePath, types);
+                Json.Serializing(typePath, types);
             }
             typesList.ItemsSource = types;
         }
         private void DeleteData()
         {
-            int selectedId = ((Note)notesContainer.SelectedItem).id; 
-            string notePath = "../../../notes.json";
-            List<Note> notes = JsonWorking.Deserializing<List<Note>>(notePath);
-            List<Note> newNotes = new List<Note>();
-            foreach (Note note in notes)
+            int selectedId = ((Record)RecordContainer.SelectedItem).id; 
+            string recPath = "../../../rec.json";
+            List<Record> rec = Json.Deserializing<List<Record>>(recPath);
+            List<Record> newrec = new List<Record>();
+            foreach (Record recor in rec)
             {
-                if (note.id != selectedId)
+                if (recor.id != selectedId)
                 {
-                    newNotes.Add(note);
+                    newrec.Add(recor);
                 }
             }
-            JsonWorking.Serializing(notePath, newNotes);
+            Json.Serializing(recPath, newrec);
         }
-        private void EditData()
+        private void EditData() 
         {
-            int selectedId = ((Note)notesContainer.SelectedItem).id;
+            int selectedId = ((Record)RecordContainer.SelectedItem).id;
             string[] values;
             if (typesList.SelectedValue != null)
-                values = new string[] { nameInput.Text, countInput.Text, typesList.SelectedValue.ToString() };
+                values = new string[] { NameInput.Text, MoneyInput.Text, typesList.SelectedValue.ToString() };
             else
-                values = new string[] { nameInput.Text, countInput.Text, "" }; 
+                values = new string[] { NameInput.Text, MoneyInput.Text, "" }; 
             if (values.Contains("") || values.Contains(null))
             {
                 MessageBox.Show("Вам нужно заполнить все поля");
@@ -122,9 +162,9 @@ namespace Wpf4
             {
                 try
                 {
-                    Note newNote = new Note(selectedId, values[0], values[2], Convert.ToDouble(values[1]), Convert.ToDateTime(ogo_calendar.SelectedDate));
+                    Record newrec = new Record(selectedId, values[0], values[2], Convert.ToDouble(values[1]), Convert.ToDateTime(Datochka.SelectedDate));
                     DeleteData();
-                    UpdateNotes(newNote);
+                    UpdateRecord(newrec);
                 }                         
                 catch (Exception)
                 {
@@ -134,7 +174,7 @@ namespace Wpf4
         }
         private void SaveData()
         {                                                                          
-            string[] values = new string[] { nameInput.Text, countInput.Text, (typesList.SelectedValue != null ? typesList.SelectedValue.ToString() : "") };
+            string[] values = new string[] { NameInput.Text, MoneyInput.Text, (typesList.SelectedValue != null ? typesList.SelectedValue.ToString() : "") };
             if (values.Contains("") || values.Contains(null))
             {
                 MessageBox.Show("Вам нужно заполнить все поля");
@@ -143,55 +183,14 @@ namespace Wpf4
             {
                 try
                 {
-                    Note newNote = new Note(GetFreeNoteId(), values[0], values[2].ToString(), Convert.ToDouble(values[1]), Convert.ToDateTime(ogo_calendar.SelectedDate));
-                    UpdateNotes(newNote);
+                    Record newrec = new Record(GetFreeRecordId(), values[0], values[2].ToString(), Convert.ToDouble(values[1]), Convert.ToDateTime(Datochka.SelectedDate));
+                    UpdateRecord(newrec);
                 }
                 catch (Exception)
                 {
                     MessageBox.Show($"Похоже, вы ввели неверные данные");
                 }
             }
-        }
-        private void createDatatype_Click(object sender, RoutedEventArgs e)
-        {
-            TypeInput typeInput = new TypeInput();
-            typeInput.ShowDialog();
-            if (typeInput.isResponse)
-            {
-                string inputed = typeInput.typedName;
-                UpdateTypesList(inputed);
-            }
-        }
-        private void dateUpdated(object sender, EventArgs e)
-        {
-            UpdateNotes();
-            RefreshWindow();
-        }
-
-        private void AddNote_Click(object sender, RoutedEventArgs e)
-        {
-            SaveData();
-            RefreshWindow();
-        }
-
-        private void notesContainer_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (notesContainer.SelectedIndex == -1) { return; }
-            Note selectedNote = (Note)notesContainer.SelectedItem;
-            nameInput.Text = selectedNote.name;
-            countInput.Text = selectedNote.count.ToString();
-            typesList.SelectedIndex = -1;
-        }
-        private void EditNote_Click(object sender, RoutedEventArgs e)
-        {
-            EditData();
-            RefreshWindow();
-        }
-
-        private void RemoveNote_Click(object sender, RoutedEventArgs e)
-        {
-            DeleteData();
-            RefreshWindow();
         }
     }
 }
