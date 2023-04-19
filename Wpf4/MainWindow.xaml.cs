@@ -32,9 +32,9 @@ namespace Wpf4
         private void RecordContainer_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (RecordContainer.SelectedIndex == -1) { return; }
-            Record selectedNote = (Record)RecordContainer.SelectedItem;
-            NameInput.Text = selectedNote.Name;
-            MoneyInput.Text = selectedNote.Money.ToString();
+            Record selectedRecord = (Record)RecordContainer.SelectedItem;
+            NameInput.Text = selectedRecord.Name;
+            MoneyInput.Text = selectedRecord.Money.ToString();
             typesList.SelectedIndex = -1;
         }
         private void createDatatype_Click(object sender, RoutedEventArgs e)
